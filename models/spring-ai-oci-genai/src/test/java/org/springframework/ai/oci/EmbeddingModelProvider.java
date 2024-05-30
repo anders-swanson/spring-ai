@@ -26,7 +26,9 @@ public class EmbeddingModelProvider {
 
 	public static final String OCI_COMPARTMENT_ID_KEY = "OCI_COMPARTMENT_ID";
 
-	public static final String EMBEDDING_MODEL = "cohere.embed-english-light-v2.0";
+	public static final String EMBEDDING_MODEL_V2 = "cohere.embed-english-light-v2.0";
+
+	public static final String EMBEDDING_MODEL_V3 = "cohere.embed-english-v3.0";
 
 	private static final String CONFIG_FILE = Paths.get(System.getProperty("user.home"), ".oci", "config").toString();
 
@@ -44,7 +46,7 @@ public class EmbeddingModelProvider {
 				.region(Region.valueOf(REGION))
 				.build(authProvider);
 			OCIEmbeddingOptions options = OCIEmbeddingOptions.builder()
-				.withModel(EMBEDDING_MODEL)
+				.withModel(EMBEDDING_MODEL_V2)
 				.withCompartment(COMPARTMENT_ID)
 				.withServingMode("on-demand")
 				.build();

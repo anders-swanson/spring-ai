@@ -15,6 +15,9 @@
  */
 package org.springframework.ai.autoconfigure.oci.genai;
 
+/**
+ * @author Anders Swanson
+ */
 public enum ServingMode {
 
 	ON_DEMAND("on-demand"), DEDICATED("dedicated");

@@ -25,12 +25,15 @@ import org.springframework.ai.embedding.EmbeddingRequest;
 import org.springframework.ai.embedding.EmbeddingResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.ai.oci.EmbeddingModelProvider.EMBEDDING_MODEL;
+import static org.springframework.ai.oci.EmbeddingModelProvider.EMBEDDING_MODEL_V2;
+import static org.springframework.ai.oci.EmbeddingModelProvider.EMBEDDING_MODEL_V3;
 
 @EnabledIfEnvironmentVariable(named = EmbeddingModelProvider.OCI_COMPARTMENT_ID_KEY, matches = ".+")
 public class OCIEmbeddingModelTest {
 
 	private final OCIEmbeddingModel embeddingModel = EmbeddingModelProvider.get();
+
+	private final List<String> content = List.of("How many states are in the USA?", "How many states are in India?");
 
 	@Test
 	void embed() {
@@ -40,11 +43,19 @@ public class OCIEmbeddingModelTest {
 
 	@Test
 	void call() {
-		EmbeddingResponse response = embeddingModel.call(new EmbeddingRequest(
-				List.of("How many states are in the USA?", "How many states are in India?"), EmbeddingOptions.EMPTY));
+		EmbeddingResponse response = embeddingModel.call(new EmbeddingRequest(content, EmbeddingOptions.EMPTY));
 		assertThat(response).isNotNull();
 		assertThat(response.getResults()).hasSize(2);
-		assertThat(response.getMetadata()).containsEntry("model", EMBEDDING_MODEL);
+		assertThat(response.getMetadata()).containsEntry("model", EMBEDDING_MODEL_V2);
+	}
+
+	@Test
+	void callWithOptions() {
+		EmbeddingResponse response = embeddingModel
+			.call(new EmbeddingRequest(content, OCIEmbeddingOptions.builder().withModel(EMBEDDING_MODEL_V3).build()));
+		assertThat(response).isNotNull();
+		assertThat(response.getResults()).hasSize(2);
+		assertThat(response.getMetadata()).containsEntry("model", EMBEDDING_MODEL_V3);
 	}
 
 }

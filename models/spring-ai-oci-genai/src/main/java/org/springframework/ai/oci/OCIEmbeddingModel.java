@@ -29,12 +29,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.AbstractEmbeddingModel;
 import org.springframework.ai.embedding.Embedding;
+import org.springframework.ai.embedding.EmbeddingOptions;
 import org.springframework.ai.embedding.EmbeddingRequest;
 import org.springframework.ai.embedding.EmbeddingResponse;
 import com.oracle.bmc.generativeaiinference.GenerativeAiInferenceClient;
 import org.springframework.ai.embedding.EmbeddingResponseMetadata;
+import org.springframework.ai.model.ModelOptionsUtils;
 import org.springframework.util.Assert;
 
+/**
+ * @author Anders Swanson
+ */
 public class OCIEmbeddingModel extends AbstractEmbeddingModel {
 
 	private final GenerativeAiInferenceClient generativeAiClient;
@@ -51,29 +56,37 @@ public class OCIEmbeddingModel extends AbstractEmbeddingModel {
 
 	@Override
 	public EmbeddingResponse call(EmbeddingRequest request) {
-		EmbedTextRequest embedTextRequest = generateEmbedTextRequest(request.getInstructions());
+		OCIEmbeddingOptions embeddingOptions;
+		if (request.getOptions() != null && !EmbeddingOptions.EMPTY.equals(request.getOptions())) {
+			embeddingOptions = ModelOptionsUtils.merge(request.getOptions(), options, OCIEmbeddingOptions.class);
+		}
+		else {
+			embeddingOptions = options;
+		}
+
+		EmbedTextRequest embedTextRequest = generateEmbedTextRequest(request.getInstructions(), embeddingOptions);
 		return generateEmbeddingResponse(generativeAiClient.embedText(embedTextRequest));
 	}
 
 	@Override
 	public List<Double> embed(Document document) {
-		EmbedTextRequest embedTextRequest = generateEmbedTextRequest(List.of(document.getContent()));
+		EmbedTextRequest embedTextRequest = generateEmbedTextRequest(List.of(document.getContent()), options);
 		return toEmbeddings(generativeAiClient.embedText(embedTextRequest));
 	}
 
-	private ServingMode servingMode() {
-		return switch (options.getServingMode()) {
-			case "dedicated" -> DedicatedServingMode.builder().endpointId(options.getModel()).build();
-			case "on-demand" -> OnDemandServingMode.builder().modelId(options.getModel()).build();
+	private ServingMode servingMode(OCIEmbeddingOptions embeddingOptions) {
+		return switch (embeddingOptions.getServingMode()) {
+			case "dedicated" -> DedicatedServingMode.builder().endpointId(embeddingOptions.getModel()).build();
+			case "on-demand" -> OnDemandServingMode.builder().modelId(embeddingOptions.getModel()).build();
 			default -> throw new IllegalArgumentException(
-					"unknown serving mode for OCI embedding model: " + options.getServingMode());
+					"unknown serving mode for OCI embedding model: " + embeddingOptions.getServingMode());
 		};
 	}
 
-	private EmbedTextRequest generateEmbedTextRequest(List<String> inputs) {
+	private EmbedTextRequest generateEmbedTextRequest(List<String> inputs, OCIEmbeddingOptions embeddingOptions) {
 		EmbedTextDetails embedTextDetails = EmbedTextDetails.builder()
-			.servingMode(servingMode())
-			.compartmentId(options.getCompartment())
+			.servingMode(servingMode(embeddingOptions))
+			.compartmentId(embeddingOptions.getCompartment())
 			.inputs(inputs)
 			.truncate(EmbedTextDetails.Truncate.None)
 			.build();

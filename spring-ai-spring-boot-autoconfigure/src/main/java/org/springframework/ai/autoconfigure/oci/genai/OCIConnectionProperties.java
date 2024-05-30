@@ -15,9 +15,14 @@
  */
 package org.springframework.ai.autoconfigure.oci.genai;
 
+import java.nio.file.Paths;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.StringUtils;
 
+/**
+ * @author Anders Swanson
+ */
 @ConfigurationProperties(OCIConnectionProperties.CONFIG_PREFIX)
 public class OCIConnectionProperties {
 
@@ -42,11 +47,13 @@ public class OCIConnectionProperties {
 
 	}
 
-	private AuthenticationType authenticationType;
+	private AuthenticationType authenticationType = AuthenticationType.FILE;
 
 	private String profile;
 
-	private String file;
+	private String file = Paths.get(System.getProperty("user.home"), ".oci", "config").toString();
+
+	;
 
 	private String tenantId;
 
@@ -58,7 +65,7 @@ public class OCIConnectionProperties {
 
 	private String passPhrase;
 
-	private String region;
+	private String region = "us-chicago-1";
 
 	private String endpoint;
 

@@ -18,12 +18,15 @@ package org.springframework.ai.autoconfigure.oci.genai;
 import org.springframework.ai.oci.OCIEmbeddingOptions;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * @author Anders Swanson
+ */
 @ConfigurationProperties(OCIEmbeddingModelProperties.CONFIG_PREFIX)
 public class OCIEmbeddingModelProperties {
 
 	public static final String CONFIG_PREFIX = "spring.ai.oci.genai.embedding";
 
-	private ServingMode servingMode;
+	private ServingMode servingMode = ServingMode.ON_DEMAND;
 
 	private String compartment;
 

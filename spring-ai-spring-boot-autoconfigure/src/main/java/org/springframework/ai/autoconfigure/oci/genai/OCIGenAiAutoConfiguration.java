@@ -36,6 +36,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.StringUtils;
 
+/**
+ * @author Anders Swanson
+ */
 @AutoConfiguration
 @ConditionalOnClass({ GenerativeAiInferenceClient.class, OCIEmbeddingModel.class })
 @EnableConfigurationProperties({ OCIConnectionProperties.class, OCIEmbeddingModelProperties.class })
